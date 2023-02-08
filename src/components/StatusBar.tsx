@@ -1,14 +1,11 @@
 import * as React from "react";
 
-export default class StatusBar extends React.Component {
+export default function StatusBar(){
 
 
 
-  render() {
-    return (
-      <>
-
-      </>
-    );
-  }
+  return (
+    <>
+    </>
+  );
 }
