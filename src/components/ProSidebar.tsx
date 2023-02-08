@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Menu, MenuItem, Sidebar, SubMenu, useProSidebar} from "react-pro-sidebar";
+import {Menu, Sidebar, useProSidebar} from "react-pro-sidebar";
 import ProSideMenu from "./ProSideMenu";
 import ProMenuItem from "./ProMenuItem";
 
@@ -8,7 +8,7 @@ export default function ProSidebar(props:any) {
   const { collapseSidebar } = useProSidebar();
 
   return (
-    <Sidebar backgroundColor={'#090c15'}>
+    <Sidebar backgroundColor={'#090c15'} style={{borderRight: '1px solid #cbd4d9'}}>
 
       <Menu>
         <ProSideMenu>
@@ -18,6 +18,7 @@ export default function ProSidebar(props:any) {
         <ProMenuItem> Documentation </ProMenuItem>
         <ProMenuItem> Calendar </ProMenuItem>
       </Menu>
+      <button onClick={() => window.electron.notificationApi.sendNotification({msg: 'message'})}>bBtn</button>
     </Sidebar>
   );
 }
