@@ -1,16 +1,18 @@
 import ReactDOM from "react-dom/client";
-import TextBox from "./TextBox";
 import {ProSidebarProvider} from "react-pro-sidebar";
 import ProSidebar from "./ProSidebar";
+import TabbedPane from "./TabbedPane";
 
 const root = ReactDOM.createRoot(document.querySelector('#root'));
 root.render(
   <ProSidebarProvider>
     <div style={{ display: 'flex' }}>
       <ProSidebar />
-      <main>
+      <main style={{ width: '100%' }}>
         {/*<StatusBar />*/}
-        <TextBox />
+
+
+        <TabbedPane />
       </main>
     </div>
   </ProSidebarProvider>

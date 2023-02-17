@@ -28,4 +28,11 @@ export const rules: Required<ModuleOptions>['rules'] = [
       },
     },
   },
+  {
+    test: /\.png?$/,
+    exclude: /(node_modules|\.webpack)/,
+    use: {
+      loader: 'file-loader',
+    }
+  }
 ];

@@ -26,5 +26,5 @@
  * ```
  */
 
-import './static/styles/index.css';
-import './components/Root';
+import './public/static/styles/index.css';
+import './public/components/Root';
