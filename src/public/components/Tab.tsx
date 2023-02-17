@@ -7,9 +7,9 @@ import javaIcon from "../static/images/java.png";
 import closeDarkIcon from "../static/images/close-dark.png";
 import closeLightIcon from "../static/images/close-light.png";
 import {useEffect, useState} from "react";
-import {File} from './TabbedPane';
+import {File} from '../logic/NPTypes';
 
-export default function Tab(props: { file: File, activePane: File, setActivePane: () => void }) {
+export default function Tab(props: { file: File, activePane: File, setActivePane: () => void, close: () => void }) {
 
   const extension = props.file.name.split('.').pop();
   let icon = '';
@@ -45,10 +45,6 @@ export default function Tab(props: { file: File, activePane: File, setActivePane
     setClickTab(props.file === props.activePane);
   }, [props.activePane]);
 
-  function handleClose() {
-    console.log()
-  }
-
   return (
     <span onClick={() => {
       setClickTab(true);
@@ -64,7 +60,9 @@ export default function Tab(props: { file: File, activePane: File, setActivePane
       <span onMouseEnter={() => setHoverTab(true)}
             onMouseLeave={() => setHoverTab(false)}
             style={{
-              backgroundColor: clickTab ? '#84ba64' : hoverTab ? '#171f35' : '#36477d',
+              backgroundColor: hoverTab ? '#171f35' : '#36477d',
+              color: clickTab && '#84ba64',
+              fontStyle: clickTab && 'italic',
               display: 'flex',
               alignItems: 'center',
               height: '20px',
@@ -80,7 +78,7 @@ export default function Tab(props: { file: File, activePane: File, setActivePane
         <span
           onMouseEnter={() => setHoverClose(true)}
           onMouseLeave={() => setHoverClose(false)}
-          onClick={() => handleClose()}
+          onClick={() => props.close()}
           style={{
           paddingRight: '5px',
           paddingLeft: '5px'

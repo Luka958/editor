@@ -1,41 +1,55 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import TextComponent from "./TextComponent";
 import Tab from "./Tab";
+import {File} from "../logic/NPTypes";
 
-export type File = { path: string, name: string, content: string };
-type Props = object;
-type State = { panes: File[], activePane: File };
+export default function TabbedPane() {
 
-export default class TabbedPane extends React.Component<Props, State> {
+  const [tabs, setTabs] = useState<File[]>([]);
+  const [activeTab, setActiveTab] = useState<File>(null);
+  const [closedActiveTab, setClosedActiveTab] = useState(false)
 
-  constructor(props: Props) {
-    super(props);
-  }
-
-  state: State = { panes: new Array<File>(), activePane: null };
-
-  componentDidMount() {
-    console.log("adding model")
-
+  useEffect(() => {
     window.electron.fileApi.openFile((file: File) => {
-      this.setState(prevState => ({
-        panes: [...prevState.panes, file],
-        activePane: file
-      }));
+      setTabs(tabs => [...tabs, file]);
+      setActiveTab(file);
     });
+  }, []);
+
+  function removeTab(arr: File[], obj: File): File[] {
+    const index = arr.indexOf(obj);
+    if (index > -1) {
+      arr.splice(index, 1);
+    }
+    // using the slice method in order to make a shallow copy,
+    // React won't rerender otherwise
+    return arr.slice();
   }
 
-  render() {
-    return (
-      <>
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-          {this.state.panes.map(pane =>
-            <Tab key={pane.path} file={pane} activePane={this.state.activePane} setActivePane={() => this.state.activePane = pane}/>
-          )}
-        </div>
-        {this.state.activePane !== null &&
-          <TextComponent key={this.state.activePane.path} content={this.state.activePane.content}/>}
-      </>
-    );
-  }
+  useEffect(() => {
+    if (closedActiveTab) {
+      setActiveTab(tabs.length > 0 ? tabs.at(tabs.length - 1) : null);
+      setClosedActiveTab(false);
+    }
+  }, [closedActiveTab])
+
+  return (
+    <>
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        {tabs.map(tab =>
+          <Tab key={tab.path}
+               file={tab}
+               activePane={activeTab}
+               setActivePane={() => setActiveTab(tab)}
+               close={() => {
+                 setClosedActiveTab(true);
+                 setTabs(removeTab(tabs, tab));
+               }}
+          />
+        )}
+      </div>
+      {activeTab !== null &&
+        <TextComponent key={activeTab.path} content={activeTab.content}/>}
+    </>
+  );
 }

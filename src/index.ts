@@ -52,7 +52,7 @@ const createWindow = (): void => {
           accelerator: 'Ctrl+N'
         },
         {
-          label: 'New Project',
+          label: 'New Directory',
           accelerator: 'Ctrl+Shift+N'
         },
         {
@@ -79,7 +79,7 @@ const createWindow = (): void => {
           }
         },
         {
-          label: 'Open Project',
+          label: 'Open Directory',
           accelerator: 'Ctrl+Shift+O',
           click() {
             dialog.showOpenDialog({
@@ -101,11 +101,39 @@ const createWindow = (): void => {
         },
         {
           label: 'Save',
-          accelerator: 'Ctrl+S'
+          accelerator: 'Ctrl+S',
+          click() {
+            mainWindow.webContents.send('save');
+          }
         },
         {
           label: 'Save As',
-          accelerator: 'Ctrl+Shift+S'
+          accelerator: 'Ctrl+Shift+S',
+          click() {
+            dialog.showSaveDialog({
+              title: 'Save File',
+              defaultPath: '~/Documents/',
+              buttonLabel: 'Save',
+              filters: [
+                { name: 'Text Files', extensions: ['txt'] },
+                { name: 'All Files', extensions: ['*'] }
+              ]
+            }).then(result => {
+              if (!result.canceled) {
+                console.log(result.filePath)
+                // write file to the selected filePath
+              }
+            }).catch(err => {
+              console.log(err)
+            })
+          }
+        },
+        {
+          label: 'Save All',
+          accelerator: 'Ctrl+Shift+A',
+          click() {
+            mainWindow.webContents.send('save-all');
+          }
         },
         {
           type: 'separator'
@@ -227,6 +255,10 @@ const createWindow = (): void => {
 ipcMain.on('notify', (event, data) => {
   console.log(data);
   event.reply('notify-response', 'Hey react app processed your event');
+});
+
+ipcMain.on('show-dialog', (event, options) => {
+  dialog.showMessageBoxSync(options);
 });
 
 // This method will be called when Electron has finished
