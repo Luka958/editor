@@ -233,6 +233,23 @@ const createWindow = (): void => {
         {
           label: 'Select All',
           accelerator: 'Ctrl+A'
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: 'Undo',
+          accelerator: 'Ctrl+Z',
+          click() {
+            mainWindow.webContents.send('undo');
+          }
+        },
+        {
+          label: 'Redo',
+          accelerator: 'Ctrl+Y',
+          click() {
+            mainWindow.webContents.send('redo');
+          }
         }
       ]
     },

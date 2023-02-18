@@ -9,7 +9,14 @@ import closeLightIcon from "../static/images/close-light.png";
 import {useEffect, useState} from "react";
 import {File} from '../logic/NPTypes';
 
-export default function Tab(props: { file: File, activePane: File, setActivePane: () => void, close: () => void }) {
+interface ITab {
+  file: File,
+  activePane: File,
+  setActivePane: () => void,
+  close: () => void
+}
+
+export default function Tab(props: ITab) {
 
   const extension = props.file.name.split('.').pop();
   let icon = '';

@@ -1,5 +1,5 @@
 import * as React from "react";
-import {CSSProperties, useState} from "react";
+import {CSSProperties, useEffect, useRef, useState} from "react";
 
 const LINE_HEIGHT = '1.25';
 
@@ -9,7 +9,7 @@ export default function TextComponent(props: {content: string}) {
     return text.split('\n').length;
   }
 
-  function getItems() {
+  function getItems(rows: number) {
     const items = [];
     const style: CSSProperties = {
       lineHeight: LINE_HEIGHT,
@@ -32,29 +32,64 @@ export default function TextComponent(props: {content: string}) {
     return num.toString().length;
   }
 
+  const textareaRef = useRef(null);
   const [rows, setRows] = useState(getRowCount(props.content));
-  const [items, setItems] = useState(getItems());
+  const [items, setItems] = useState(getItems(rows));
+  const [content, setContent] = useState(props.content.replace('\r', ''));
+  const [currentLine, setCurrentLine] = useState(0);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+
+    const handleTextareaChange = (e: { key: string; preventDefault: () => void; }) => {
+      if (e.key == 'Tab') {
+        e.preventDefault();
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+
+        // set textarea value to: text before caret + tab + text after caret
+        textarea.value = textarea.value.substring(0, start) + "\t" + textarea.value.substring(end);
+
+        // put caret at right position again
+        // textarea.selectionStart = textarea.selectionEnd = start + 1;
+        textarea.setSelectionRange(start + 1, start + 1)
+      }
+    };
+
+    textarea.addEventListener('keydown', handleTextareaChange);
+
+    return () => {
+      textarea.removeEventListener('keydown', handleTextareaChange);
+    };
+  }, []);
 
   return (
-    <div style={{
-      display: 'flex'
-    }}>
-      <span style={{
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+    <div className="flex-only">
+      <span className="flex-direction-column">
         {items}
       </span>
       <textarea className='colors'
+                ref={textareaRef}
                 defaultValue={props.content}
                 spellCheck={false}
                 onChange={e => {
-                  const newRows = getRowCount(e.target.value);
-                  const lastChar = e.target.value.charAt(e.target.value.length - 1);
-                  if (lastChar === '\n')
-                    console.log("newline")
-                  setRows(lastChar === '\n' ? newRows + 1 : newRows);
-                  setItems(getItems());
+                  const lines = e.target.value.split('\n').length;
+                  setRows(lines);
+                  setItems(getItems(lines));
+
+                  const index = e.target.selectionStart;
+                  const textBeforeSelection = e.target.value.slice(0, index);
+                  const line = (textBeforeSelection.match(/\n/g) || []).length + 1;
+                  setCurrentLine(line);
+
+                  // regex to match the cluster of the same characters at the end of the string
+                  const regex = /(\s)\1*$/;
+                  const match = regex.exec(e.target.value);
+
+                  if (match !== null && match[0].length === 1) {
+                    setContent(e.target.value);
+                    console.log("saved")
+                  }
                 }}
                 style={{
                   width: '100%',

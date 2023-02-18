@@ -35,7 +35,7 @@ export default function TabbedPane() {
 
   return (
     <>
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
+      <div className="flex-direction-row">
         {tabs.map(tab =>
           <Tab key={tab.path}
                file={tab}
@@ -49,7 +49,10 @@ export default function TabbedPane() {
         )}
       </div>
       {activeTab !== null &&
-        <TextComponent key={activeTab.path} content={activeTab.content}/>}
+        <TextComponent key={activeTab.path}
+                       content={activeTab.content}
+        />
+      }
     </>
   );
 }

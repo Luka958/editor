@@ -56,6 +56,20 @@ body {
   color: #cbd4d9;
 }
 
+.flex-only {
+  display: flex;
+}
+
+.flex-direction-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.flex-direction-column {
+  display: flex;
+  flex-direction: column;
+}
+
 
 /*colors
 background #090c15

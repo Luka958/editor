@@ -1,7 +1,9 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-import {ipcRenderer, contextBridge, dialog} from 'electron';
+import {ipcRenderer, contextBridge} from 'electron';
 import {File, Directory} from './public/logic/NPTypes';
+
+type FileCallback = (file: File) => void;
 
 contextBridge.exposeInMainWorld('electron', {
   notificationApi: {
@@ -21,17 +23,25 @@ contextBridge.exposeInMainWorld('electron', {
     newDirectory: (cb: (dirname: string) => void) => {
       ipcRenderer.on('new-directory', (e, dirname) => cb(dirname));
     },
-    save: (cb: (file: File) => void) => {
+    save: (cb: FileCallback) => {
       ipcRenderer.on('save', (e, file) => cb(file));
     },
-    saveAs: (cb: (file: File) => void) => {
+    saveAs: (cb: FileCallback) => {
       ipcRenderer.on('save-as', (e, file) => cb(file));
     },
-    openFile: (cb: (file: File) => void) => {
+    openFile: (cb: FileCallback) => {
       ipcRenderer.on('open-file', (e, file) => cb(file));
     },
     openDirectory: (cb: (dir: Directory) => void) => {
       ipcRenderer.on('open-directory', (e, dir) => cb(dir));
+    }
+  },
+  editApi: {
+    undo: (cb: FileCallback) => {
+      ipcRenderer.on('undo', (e, file) => cb(file));
+    },
+    redo: (cb: FileCallback) => {
+      ipcRenderer.on('redo', (e, file) => cb(file));
     }
   }
 });
