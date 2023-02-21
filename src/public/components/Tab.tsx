@@ -1,13 +1,6 @@
-import jsIcon from "../static/images/js.png";
-import tsIcon from "../static/images/ts.png";
-import ktsIcon from "../static/images/kts.png";
-import pyIcon from "../static/images/py.png";
-import javaIcon from "../static/images/java.png";
-
-import closeDarkIcon from "../static/images/close-dark.png";
-import closeLightIcon from "../static/images/close-light.png";
 import {useEffect, useState} from "react";
 import {File} from '../logic/NPTypes';
+import Icons, {getIconFromExtension} from "./Icons";
 
 interface ITab {
   file: File,
@@ -20,50 +13,34 @@ interface ITab {
 export default function Tab(props: ITab) {
 
   const extension = props.file.name.split('.').pop();
-  let icon = '';
-
-  switch (extension) {
-    case 'js': {
-      icon = jsIcon;
-      break;
-    }
-    case 'ts': {
-      icon = tsIcon;
-      break;
-    }
-    case 'kts': {
-      icon = ktsIcon;
-      break;
-    }
-    case 'py': {
-      icon = pyIcon;
-      break;
-    }
-    case 'java': {
-      icon = javaIcon;
-      break;
-    }
-  }
+  const icon = getIconFromExtension(extension);
 
   const [hoverClose, setHoverClose] = useState(false);
   const [hoverTab, setHoverTab] = useState(false);
   const [clickTab, setClickTab] = useState(true);
+
+  function handleClick() {
+    setClickTab(true);
+
+    if (props.activePane !== props.file) {
+      // pane changed (oldPane !== newPane)
+
+    }
+    props.setActivePane();
+  }
 
   useEffect(() => {
     setClickTab(props.file === props.activePane);
   }, [props.activePane]);
 
   return (
-    <span onClick={() => {
-      setClickTab(true);
-      props.setActivePane();
-    }}
+    <span onClick={handleClick}
       style={{
         display: 'flex',
         alignItems: 'center'
       }}
     >
-      {icon !== '' && <img src={icon.toString()} width="20px" alt="tab-icon"/>}
+      {icon !== '' && <img src={icon} width="20px" alt="tab-icon"/>}
 
       <span onMouseEnter={() => setHoverTab(true)}
             onMouseLeave={() => setHoverTab(false)}
@@ -92,7 +69,10 @@ export default function Tab(props: ITab) {
           paddingRight: '5px',
           paddingLeft: '5px'
         }}>
-          <img src={hoverClose ? closeLightIcon : closeDarkIcon} width="10px" alt="close-icon"/>
+          <img src={hoverClose ? Icons.closeLightIconSrc : Icons.closeDarkIconSrc}
+               width="10px"
+               alt="close-icon"
+          />
         </span>
       </span>
     </span>

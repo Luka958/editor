@@ -5,6 +5,7 @@ const LINE_HEIGHT = '1.25';
 
 interface ITextComponent {
   content: string,
+  setContent: (content: string) => void,
   setModified: (modified: boolean) => void
 }
 
@@ -66,6 +67,7 @@ export default function TextComponent(props: ITextComponent) {
 
     return () => {
       textarea.removeEventListener('keydown', handleTextareaChange);
+      props.setContent(textarea.value);
     };
   }, []);
 
@@ -96,7 +98,7 @@ export default function TextComponent(props: ITextComponent) {
                     setSavedContent(e.target.value);
                   }
                   setContent(e.target.value);
-                  props.setModified(e.target.value !== content);
+                  props.setModified(e.target.value !== savedContent);
                 }}
                 style={{
                   width: '100%',

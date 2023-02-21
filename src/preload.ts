@@ -4,6 +4,7 @@ import {ipcRenderer, contextBridge} from 'electron';
 import {File, Directory} from './public/logic/NPTypes';
 
 type FileCallback = (file: File) => void;
+type DirCallback = (dir: Directory) => void;
 
 contextBridge.exposeInMainWorld('electron', {
   notificationApi: {
@@ -17,23 +18,23 @@ contextBridge.exposeInMainWorld('electron', {
     },
   },
   fileApi: {
-    newFile: (cb: (filename: string) => void) => {
-      ipcRenderer.on('new-file', (e, filename) => cb(filename));
+    newFile: (cb: (file: File) => void) => {
+      ipcRenderer.on('new-file', (e, file: File) => cb(file));
     },
     newDirectory: (cb: (dirname: string) => void) => {
       ipcRenderer.on('new-directory', (e, dirname) => cb(dirname));
     },
     save: (cb: FileCallback) => {
-      ipcRenderer.on('save', (e, file) => cb(file));
+      ipcRenderer.on('save', (e, file: File) => cb(file));
     },
     saveAs: (cb: FileCallback) => {
-      ipcRenderer.on('save-as', (e, file) => cb(file));
+      ipcRenderer.on('save-as', (e, file: File) => cb(file));
     },
     openFile: (cb: FileCallback) => {
-      ipcRenderer.on('open-file', (e, file) => cb(file));
+      ipcRenderer.on('open-file', (e, file: File) => cb(file));
     },
-    openDirectory: (cb: (dir: Directory) => void) => {
-      ipcRenderer.on('open-directory', (e, dir) => cb(dir));
+    openDirectory: (cb: DirCallback) => {
+      ipcRenderer.on('open-directory', (e, dir: Directory) => cb(dir));
     }
   },
   editApi: {

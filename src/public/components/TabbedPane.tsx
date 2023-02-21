@@ -8,14 +8,16 @@ export default function TabbedPane() {
   const [tabs, setTabs] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState<File>(null);
   const [closedActiveTab, setClosedActiveTab] = useState(false);
-  const [modified, setModified] = useState(null);
+
+  function openFileCallback(file: File) {
+    file.modified = false;
+    setTabs(tabs => [...tabs, file]);
+    setActiveTab(file);
+  }
 
   useEffect(() => {
-    window.electron.fileApi.openFile((file: File) => {
-      file.modified = false;
-      setTabs(tabs => [...tabs, file]);
-      setActiveTab(file);
-    });
+    window.electron.fileApi.openFile(openFileCallback);
+    window.electron.fileApi.newFile(openFileCallback);
   }, []);
 
   function removeTab(arr: File[], obj: File): File[] {
@@ -35,18 +37,22 @@ export default function TabbedPane() {
     }
   }, [closedActiveTab]);
 
-  useEffect(() => {
-    console.log(modified)
-  }, [modified]);
-
   function updateModificationStatus(modified: boolean): void {
-    const newTabs = tabs.map(tab => {
-      if (tab === activeTab) {
+    setTabs(tabs.map(tab => {
+      if (tab.path === activeTab.path) {
         return { ...tab, modified: modified };
       }
       return tab;
-    });
-    setTabs(newTabs);
+    }));
+  }
+
+  function handleSetContent(content: string) {
+    // setTabs(tabs.map(tab => {
+    //   if (tab.path === activeTab.path) {
+    //     return { ...tab, content: content };
+    //   }
+    //   return tab;
+    // }));
   }
 
   return (
@@ -68,7 +74,8 @@ export default function TabbedPane() {
       {activeTab !== null &&
         <TextComponent key={activeTab.path}
                        content={activeTab.content}
-                       setModified={modified => updateModificationStatus(modified)}
+                       setContent={handleSetContent}
+                       setModified={updateModificationStatus}
         />
       }
     </>
