@@ -13,7 +13,8 @@ interface ITab {
   file: File,
   activePane: File,
   setActivePane: () => void,
-  close: () => void
+  close: () => void,
+  modified: boolean
 }
 
 export default function Tab(props: ITab) {
@@ -82,6 +83,7 @@ export default function Tab(props: ITab) {
         }}>
           { props.file.name }
         </span>
+        {props.modified && <span><b>M</b></span>}
         <span
           onMouseEnter={() => setHoverClose(true)}
           onMouseLeave={() => setHoverClose(false)}

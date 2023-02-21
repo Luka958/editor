@@ -3,7 +3,12 @@ import {CSSProperties, useEffect, useRef, useState} from "react";
 
 const LINE_HEIGHT = '1.25';
 
-export default function TextComponent(props: {content: string}) {
+interface ITextComponent {
+  content: string,
+  setModified: (modified: boolean) => void
+}
+
+export default function TextComponent(props: ITextComponent) {
 
   function getRowCount(text: string): number {
     return text.split('\n').length;
@@ -36,6 +41,7 @@ export default function TextComponent(props: {content: string}) {
   const [rows, setRows] = useState(getRowCount(props.content));
   const [items, setItems] = useState(getItems(rows));
   const [content, setContent] = useState(props.content.replace('\r', ''));
+  const [savedContent, setSavedContent] = useState(content);
   const [currentLine, setCurrentLine] = useState(0);
 
   useEffect(() => {
@@ -64,7 +70,7 @@ export default function TextComponent(props: {content: string}) {
   }, []);
 
   return (
-    <div className="flex-only">
+    <div className="flex-only" style={{overflow: 'hidden'}}>
       <span className="flex-direction-column">
         {items}
       </span>
@@ -87,13 +93,14 @@ export default function TextComponent(props: {content: string}) {
                   const match = regex.exec(e.target.value);
 
                   if (match !== null && match[0].length === 1) {
-                    setContent(e.target.value);
-                    console.log("saved")
+                    setSavedContent(e.target.value);
                   }
+                  setContent(e.target.value);
+                  props.setModified(e.target.value !== content);
                 }}
                 style={{
                   width: '100%',
-                  height: 'calc(100vh - 3px)',
+                  height: 'auto',
                   flex: '1',
                   resize: 'none',
                   border: 'none',
@@ -102,7 +109,8 @@ export default function TextComponent(props: {content: string}) {
                   lineHeight: LINE_HEIGHT,
                   whiteSpace: 'nowrap',
                   margin: 0,
-                  padding: 0
+                  padding: 0,
+                  overflow: 'hidden'
                 }}
       ></textarea>
     </div>

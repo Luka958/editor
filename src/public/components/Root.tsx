@@ -6,11 +6,12 @@ import TabbedPane from "./TabbedPane";
 const root = ReactDOM.createRoot(document.querySelector('#root'));
 root.render(
   <ProSidebarProvider>
-    <div style={{ display: 'flex' }}>
+    <div className="flex-only"
+         style={{ width: '100%' }}
+    >
       <ProSidebar />
       <main style={{ width: '100%' }}>
         {/*<StatusBar />*/}
-
 
         <TabbedPane />
       </main>
