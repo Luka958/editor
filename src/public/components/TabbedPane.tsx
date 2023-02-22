@@ -1,13 +1,15 @@
-import React, {useEffect, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import TextComponent from "./TextComponent";
 import Tab from "./Tab";
 import {File} from "../logic/NPTypes";
+import {FileContext} from "../logic/contexts/FileContext";
 
 export default function TabbedPane() {
 
   const [tabs, setTabs] = useState<File[]>([]);
   const [activeTab, setActiveTab] = useState<File>(null);
   const [closedActiveTab, setClosedActiveTab] = useState(false);
+  const { files, dispatchFiles } = useContext(FileContext);
 
   function openFileCallback(file: File) {
     file.modified = false;
