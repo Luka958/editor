@@ -13,7 +13,6 @@ export const fileReducer = (state: File[], action: ACTION_TYPE) => {
     case 'remove-file':
       return state.filter(book => book.path !== action.payload.path);
     default:
-      // return new Error('Wrong action type in the file reducer!');
       return state;
   }
 }

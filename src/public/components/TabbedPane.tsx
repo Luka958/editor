@@ -15,6 +15,7 @@ export default function TabbedPane() {
     file.modified = false;
     setTabs(tabs => [...tabs, file]);
     setActiveTab(file);
+    dispatchFiles({ type: 'add-file', payload: file });
   }
 
   useEffect(() => {
@@ -60,7 +61,7 @@ export default function TabbedPane() {
   return (
     <>
       <div className="flex-direction-row">
-        {tabs.map(tab =>
+        {files.map(tab =>
           <Tab key={tab.path}
                file={tab}
                activePane={activeTab}
