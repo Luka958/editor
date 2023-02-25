@@ -6,6 +6,8 @@ import {File, Directory} from './public/logic/NPTypes';
 type FileCallback = (file: File) => void;
 type DirCallback = (dir: Directory) => void;
 
+let prevSaveListener: { (...args: never[]): void; (): void; } = undefined;
+
 contextBridge.exposeInMainWorld('electron', {
   notificationApi: {
     sendNotification(message: object) {
@@ -24,8 +26,18 @@ contextBridge.exposeInMainWorld('electron', {
     newDirectory: (cb: (dirname: string) => void) => {
       ipcRenderer.on('new-directory', (e, dirname) => cb(dirname));
     },
-    save: (cb: FileCallback) => {
-      ipcRenderer.on('save', (e, file: File) => cb(file));
+    save: (cb: () => File) => {
+      // due to the fact that the save method is called whenever the files or
+      // activeFile are changed, the old listener (prevSaveListener) must be
+      // replaced with the new one
+      const listener = () => {
+        ipcRenderer.send('save-reply', cb());
+      };
+      if (ipcRenderer.listenerCount('save') > 0) {
+        ipcRenderer.removeListener('save', prevSaveListener);
+      }
+      ipcRenderer.on('save', listener);
+      prevSaveListener = listener;
     },
     saveAs: (cb: FileCallback) => {
       ipcRenderer.on('save-as', (e, file: File) => cb(file));

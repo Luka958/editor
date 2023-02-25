@@ -1,11 +1,12 @@
 import * as React from "react";
 import {CSSProperties, useEffect, useRef, useState} from "react";
+import {File} from "../logic/NPTypes";
 
 const LINE_HEIGHT = '1.25';
 
 interface ITextComponent {
-  content: string,
-  setContent: (content: string) => void,
+  file: File,
+  activeFile: File,
   setModified: (modified: boolean) => void
 }
 
@@ -39,9 +40,9 @@ export default function TextComponent(props: ITextComponent) {
   }
 
   const textareaRef = useRef(null);
-  const [rows, setRows] = useState(getRowCount(props.content));
+  const [rows, setRows] = useState(getRowCount(props.file.content));
   const [items, setItems] = useState(getItems(rows));
-  const [content, setContent] = useState(props.content.replace('\r', ''));
+  const [content, setContent] = useState(props.file.content.replace('\r', ''));
   const [savedContent, setSavedContent] = useState(content);
   const [currentLine, setCurrentLine] = useState(0);
 
@@ -67,18 +68,22 @@ export default function TextComponent(props: ITextComponent) {
 
     return () => {
       textarea.removeEventListener('keydown', handleTextareaChange);
-      props.setContent(textarea.value);
     };
   }, []);
 
   return (
-    <div className="flex-only" style={{overflow: 'hidden'}}>
+    <div className="flex-only"
+         style={{
+           display: props.activeFile.path === props.file.path ? 'flex' : 'none',
+           overflow: 'hidden'
+         }}
+    >
       <span className="flex-direction-column">
         {items}
       </span>
       <textarea className='colors'
                 ref={textareaRef}
-                defaultValue={props.content}
+                defaultValue={props.file.content}
                 spellCheck={false}
                 onChange={e => {
                   const lines = e.target.value.split('\n').length;
@@ -90,14 +95,7 @@ export default function TextComponent(props: ITextComponent) {
                   const line = (textBeforeSelection.match(/\n/g) || []).length + 1;
                   setCurrentLine(line);
 
-                  // regex to match the cluster of the same characters at the end of the string
-                  const regex = /(\s)\1*$/;
-                  const match = regex.exec(e.target.value);
-
-                  if (match !== null && match[0].length === 1) {
-                    setSavedContent(e.target.value);
-                  }
-                  setContent(e.target.value);
+                  // TODO save content
                   props.setModified(e.target.value !== savedContent);
                 }}
                 style={{

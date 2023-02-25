@@ -3,19 +3,36 @@ import TextComponent from "./TextComponent";
 import Tab from "./Tab";
 import {File} from "../logic/NPTypes";
 import {FileContext} from "../logic/contexts/FileContext";
+import {FileAction} from "../logic/reducers/FileReducer";
 
 export default function TabbedPane() {
 
-  const [tabs, setTabs] = useState<File[]>([]);
-  const [activeTab, setActiveTab] = useState<File>(null);
   const [closedActiveTab, setClosedActiveTab] = useState(false);
-  const { files, dispatchFiles } = useContext(FileContext);
+  const { files, dispatchFiles, activeFile, setActiveFile } = useContext(FileContext);
 
   function openFileCallback(file: File) {
     file.modified = false;
-    setTabs(tabs => [...tabs, file]);
-    setActiveTab(file);
-    dispatchFiles({ type: 'add-file', payload: file });
+    dispatchFiles({
+      type: FileAction.ADD_FILE,
+      payload: file
+    });
+    setActiveFile(file);
+  }
+
+  function saveFileCallback() {
+    console.log("saving")
+    console.log(activeFile)
+    console.log(files)
+    // updateModificationStatus(false);
+    return activeFile;
+  }
+
+  function updateModificationStatus(modified: boolean): void {
+    dispatchFiles({
+      type: FileAction.UPDATE_MODIFICATION_STATUS,
+      payload: activeFile,
+      modified: modified
+    });
   }
 
   useEffect(() => {
@@ -23,64 +40,44 @@ export default function TabbedPane() {
     window.electron.fileApi.newFile(openFileCallback);
   }, []);
 
-  function removeTab(arr: File[], obj: File): File[] {
-    const index = arr.indexOf(obj);
-    if (index > -1) {
-      arr.splice(index, 1);
-    }
-    // using the slice method in order to make a shallow copy,
-    // React won't rerender otherwise
-    return arr.slice();
-  }
+  useEffect(() => {
+    window.electron.fileApi.save(saveFileCallback);
+  }, [files, activeFile]);
 
   useEffect(() => {
+    // sets the next active file if it exists, after one of them is closed
     if (closedActiveTab) {
-      setActiveTab(tabs.length > 0 ? tabs.at(tabs.length - 1) : null);
+      setActiveFile(files.length > 0 ? files.at(files.length - 1) : null);
       setClosedActiveTab(false);
     }
   }, [closedActiveTab]);
 
-  function updateModificationStatus(modified: boolean): void {
-    setTabs(tabs.map(tab => {
-      if (tab.path === activeTab.path) {
-        return { ...tab, modified: modified };
-      }
-      return tab;
-    }));
-  }
-
-  function handleSetContent(content: string) {
-    // setTabs(tabs.map(tab => {
-    //   if (tab.path === activeTab.path) {
-    //     return { ...tab, content: content };
-    //   }
-    //   return tab;
-    // }));
-  }
-
   return (
     <>
       <div className="flex-direction-row">
-        {files.map(tab =>
-          <Tab key={tab.path}
-               file={tab}
-               activePane={activeTab}
-               setActivePane={() => setActiveTab(tab)}
+        {files.map(file =>
+          <Tab key={file.path}
+               file={file}
+               activePane={activeFile}
+               setActivePane={() => setActiveFile(file)}
                close={() => {
                  setClosedActiveTab(true);
-                 setTabs(removeTab(tabs, tab));
+                 dispatchFiles({
+                   type: FileAction.REMOVE_FILE,
+                   payload: file
+                 });
                }}
-               modified={tab.modified}
+               modified={file.modified}
           />
         )}
       </div>
-      {activeTab !== null &&
-        <TextComponent key={activeTab.path}
-                       content={activeTab.content}
-                       setContent={handleSetContent}
+      {files.map(file =>
+        <TextComponent key={file.path}
+                       file={file}
+                       activeFile={activeFile}
                        setModified={updateModificationStatus}
         />
-      }
+      )}
     </>
   );
 }
