@@ -8,6 +8,7 @@ import {FileAction} from "../logic/reducers/FileReducer";
 export default function TabbedPane() {
 
   const [closedActiveTab, setClosedActiveTab] = useState(false);
+  const [activeFileContent, setActiveFileContent] = useState(null);
   const { files, dispatchFiles, activeFile, setActiveFile } = useContext(FileContext);
 
   function openFileCallback(file: File) {
@@ -20,11 +21,11 @@ export default function TabbedPane() {
   }
 
   function saveFileCallback() {
-    console.log("saving")
-    console.log(activeFile)
-    console.log(files)
-    // updateModificationStatus(false);
-    return activeFile;
+    updateContent(activeFileContent);
+    updateModificationStatus(false);
+    // using object destructuring because the old content would
+    // be sent to the electron if we pass only the activeFile
+    return {...activeFile, content: activeFileContent};
   }
 
   function updateModificationStatus(modified: boolean): void {
@@ -32,6 +33,14 @@ export default function TabbedPane() {
       type: FileAction.UPDATE_MODIFICATION_STATUS,
       payload: activeFile,
       modified: modified
+    });
+  }
+
+  function updateContent(content: string): void {
+    dispatchFiles({
+      type: FileAction.UPDATE_CONTENT,
+      payload: activeFile,
+      content: content
     });
   }
 
@@ -49,6 +58,10 @@ export default function TabbedPane() {
     if (closedActiveTab) {
       setActiveFile(files.length > 0 ? files.at(files.length - 1) : null);
       setClosedActiveTab(false);
+
+      if (activeFile !== null) {
+        setActiveFileContent(activeFile.content);
+      }
     }
   }, [closedActiveTab]);
 
@@ -76,6 +89,7 @@ export default function TabbedPane() {
                        file={file}
                        activeFile={activeFile}
                        setModified={updateModificationStatus}
+                       setActiveFileContent={setActiveFileContent}
         />
       )}
     </>

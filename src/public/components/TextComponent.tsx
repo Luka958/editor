@@ -8,6 +8,7 @@ interface ITextComponent {
   file: File,
   activeFile: File,
   setModified: (modified: boolean) => void
+  setActiveFileContent: (content: string) => void
 }
 
 export default function TextComponent(props: ITextComponent) {
@@ -42,8 +43,7 @@ export default function TextComponent(props: ITextComponent) {
   const textareaRef = useRef(null);
   const [rows, setRows] = useState(getRowCount(props.file.content));
   const [items, setItems] = useState(getItems(rows));
-  const [content, setContent] = useState(props.file.content.replace('\r', ''));
-  const [savedContent, setSavedContent] = useState(content);
+  const [savedContent, setSavedContent] = useState(props.file.content.replace('\r', ''));
   const [currentLine, setCurrentLine] = useState(0);
 
   useEffect(() => {
@@ -71,6 +71,12 @@ export default function TextComponent(props: ITextComponent) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!props.file.modified) {
+      setSavedContent(textareaRef.current.value);
+    }
+  }, [props.file.modified]);
+
   return (
     <div className="flex-only"
          style={{
@@ -97,6 +103,7 @@ export default function TextComponent(props: ITextComponent) {
 
                   // TODO save content
                   props.setModified(e.target.value !== savedContent);
+                  props.setActiveFileContent(e.target.value);
                 }}
                 style={{
                   width: '100%',

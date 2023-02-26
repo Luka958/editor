@@ -3,13 +3,15 @@ import {File} from "../NPTypes";
 export enum FileAction {
   ADD_FILE,
   REMOVE_FILE,
-  UPDATE_MODIFICATION_STATUS
+  UPDATE_MODIFICATION_STATUS,
+  UPDATE_CONTENT
 }
 
 export type ACTION_TYPE = {
   type: FileAction,
   payload: File,
-  modified?: boolean
+  modified?: boolean,
+  content?: string
 }
 
 export function fileReducer(state: File[], action: ACTION_TYPE): File[] {
@@ -24,6 +26,14 @@ export function fileReducer(state: File[], action: ACTION_TYPE): File[] {
       return state.map(file => {
         if (file.path === action.payload.path) {
           return { ...file, modified: action.modified };
+        }
+        return file;
+      });
+
+    case FileAction.UPDATE_CONTENT:
+      return state.map(file => {
+        if (file.path === action.payload.path) {
+          return { ...file, content: action.content };
         }
         return file;
       });
