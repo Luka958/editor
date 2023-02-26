@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {File} from '../logic/NPTypes';
 import Icons, {getIconFromExtension} from "./Icons";
 
@@ -22,7 +22,7 @@ export default function Tab(props: ITab) {
   function handleClick() {
     setClickTab(true);
 
-    if (props.activePane !== props.file) {
+    if (props.activePane.path !== props.file.path) {
       // pane changed (oldPane !== newPane)
 
     }
@@ -30,7 +30,12 @@ export default function Tab(props: ITab) {
   }
 
   useEffect(() => {
-    setClickTab(props.file === props.activePane);
+    const val = props.file.path === props.activePane.path;
+    setClickTab(val);
+    console.log(val)
+    if (val) {
+      props.setActivePane();
+    }
   }, [props.activePane]);
 
   return (

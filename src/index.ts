@@ -176,7 +176,6 @@ const createWindow = (): void => {
           accelerator: 'Ctrl+S',
           click() {
             mainWindow.webContents.send('save');
-            console.log("saved")
             ipcMain.on('save-reply', (e: IpcMainEvent, file: File) => {
               fs.writeFile(file.path, file.content, (err) => {
                 if (err) {
@@ -349,13 +348,19 @@ const createWindow = (): void => {
   Menu.setApplicationMenu(mainMenu);
 }
 
-ipcMain.on('notify', (event, data) => {
-  console.log(data);
-  event.reply('notify-response', 'Hey react app processed your event');
-});
-
-ipcMain.on('show-dialog', (event, options) => {
-  dialog.showMessageBoxSync(options);
+ipcMain.on('save-dialog', (event, args) => {
+  const result = dialog.showMessageBoxSync(args.options);
+  switch (result) {
+    case 1:
+      // close without saving
+      break;
+    default:
+      fs.writeFile(args.file.path, args.file.content, (err) => {
+        if (err) {
+          console.log(err);
+        }
+      });
+  }
 });
 
 // This method will be called when Electron has finished

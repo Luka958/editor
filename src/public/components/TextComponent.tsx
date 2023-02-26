@@ -1,14 +1,15 @@
 import * as React from "react";
 import {CSSProperties, useEffect, useRef, useState} from "react";
-import {File} from "../logic/NPTypes";
+import {File, StatusBarInfo} from "../logic/NPTypes";
 
 const LINE_HEIGHT = '1.25';
 
 interface ITextComponent {
   file: File,
   activeFile: File,
-  setModified: (modified: boolean) => void
-  setActiveFileContent: (content: string) => void
+  setModified: (modified: boolean) => void,
+  setActiveFileContent: (content: string) => void,
+  setStatusBarInfo: (info: StatusBarInfo) => void
 }
 
 export default function TextComponent(props: ITextComponent) {
@@ -40,11 +41,25 @@ export default function TextComponent(props: ITextComponent) {
     return num.toString().length;
   }
 
+  function getStatusBarInfo(area: HTMLTextAreaElement) {
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    const textBeforeSelection = area.value.slice(0, start);
+    const line = (textBeforeSelection.match(/\n/g) || []).length + 1;
+
+    // +1 col because we want them to start from 1
+    return {
+      length: area.textLength,
+      ln: line,
+      col: area.selectionDirection === 'forward' ? Math.max(start, end) + 1 : Math.min(start, end) + 1,
+      sel: end - start
+    }
+  }
+
   const textareaRef = useRef(null);
   const [rows, setRows] = useState(getRowCount(props.file.content));
   const [items, setItems] = useState(getItems(rows));
   const [savedContent, setSavedContent] = useState(props.file.content.replace('\r', ''));
-  const [currentLine, setCurrentLine] = useState(0);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -60,10 +75,9 @@ export default function TextComponent(props: ITextComponent) {
 
         // put caret at right position again
         // textarea.selectionStart = textarea.selectionEnd = start + 1;
-        textarea.setSelectionRange(start + 1, start + 1)
+        textarea.setSelectionRange(start + 1, start + 1);
       }
     };
-
     textarea.addEventListener('keydown', handleTextareaChange);
 
     return () => {
@@ -96,15 +110,14 @@ export default function TextComponent(props: ITextComponent) {
                   setRows(lines);
                   setItems(getItems(lines));
 
-                  const index = e.target.selectionStart;
-                  const textBeforeSelection = e.target.value.slice(0, index);
-                  const line = (textBeforeSelection.match(/\n/g) || []).length + 1;
-                  setCurrentLine(line);
-
-                  // TODO save content
+                  // save content
                   props.setModified(e.target.value !== savedContent);
                   props.setActiveFileContent(e.target.value);
+
+                  // status bar
+                  props.setStatusBarInfo(getStatusBarInfo(e.target));
                 }}
+                onClick={e => props.setStatusBarInfo(getStatusBarInfo(e.target as HTMLTextAreaElement))}
                 style={{
                   width: '100%',
                   height: 'auto',

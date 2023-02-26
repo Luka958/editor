@@ -9,7 +9,7 @@ type DirCallback = (dir: Directory) => void;
 let prevSaveListener: { (...args: never[]): void; (): void; } = undefined;
 
 contextBridge.exposeInMainWorld('electron', {
-  notificationApi: {
+  notificationAPI: {
     sendNotification(message: object) {
       ipcRenderer.send('notify', message);
 
@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld('electron', {
       })
     },
   },
-  fileApi: {
+  fileAPI: {
     newFile: (cb: (file: File) => void) => {
       ipcRenderer.on('new-file', (e, file: File) => cb(file));
     },
@@ -49,20 +49,26 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.on('open-directory', (e, dir: Directory) => cb(dir));
     }
   },
-  editApi: {
+  editAPI: {
     undo: (cb: FileCallback) => {
       ipcRenderer.on('undo', (e, file) => cb(file));
     },
     redo: (cb: FileCallback) => {
       ipcRenderer.on('redo', (e, file) => cb(file));
     }
+  },
+  dialogAPI: {
+    saveDialog: (cb: () => File) => {
+      ipcRenderer.send('save-dialog', {
+        options: {
+          type: 'question',
+          buttons: ['Yes', 'No'],
+          title: 'Question',
+          message: 'Do you want to save a file before closing?',
+          detail: 'This action will erase all your unsaved data.'
+        },
+        file: cb()
+      });
+    }
   }
 });
-
-// ipcRenderer.send('show-dialog', {
-//   type: 'question',
-//   buttons: ['Yes', 'No'],
-//   title: 'Question',
-//   message: 'Do you want to do this?',
-//   detail: 'This action will erase all your data'
-// });

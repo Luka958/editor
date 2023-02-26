@@ -1,14 +1,16 @@
 import React, {useContext, useEffect, useState} from "react";
 import TextComponent from "./TextComponent";
 import Tab from "./Tab";
-import {File} from "../logic/NPTypes";
+import {File, StatusBarInfo} from "../logic/NPTypes";
 import {FileContext} from "../logic/contexts/FileContext";
 import {FileAction} from "../logic/reducers/FileReducer";
+import StatusBar from "./StatusBar";
 
 export default function TabbedPane() {
 
   const [closedActiveTab, setClosedActiveTab] = useState(false);
   const [activeFileContent, setActiveFileContent] = useState(null);
+  const [statusBarInfo, setStatusBarInfo] = useState<StatusBarInfo>(null);
   const { files, dispatchFiles, activeFile, setActiveFile } = useContext(FileContext);
 
   function openFileCallback(file: File) {
@@ -45,12 +47,12 @@ export default function TabbedPane() {
   }
 
   useEffect(() => {
-    window.electron.fileApi.openFile(openFileCallback);
-    window.electron.fileApi.newFile(openFileCallback);
+    window.electron.fileAPI.openFile(openFileCallback);
+    window.electron.fileAPI.newFile(openFileCallback);
   }, []);
 
   useEffect(() => {
-    window.electron.fileApi.save(saveFileCallback);
+    window.electron.fileAPI.save(saveFileCallback);
   }, [files, activeFile]);
 
   useEffect(() => {
@@ -65,6 +67,38 @@ export default function TabbedPane() {
     }
   }, [closedActiveTab]);
 
+  // closing file
+
+  const [closedAnyTab, setClosedAnyTab] = useState(false);
+
+  function handleCloseTab(file: File) {
+    if (file.path !== activeFile.path) {
+      setActiveFile(file);
+    }
+    setClosedAnyTab(true);
+
+
+
+
+    // setClosedActiveTab(false);
+    // // window.electron.dialogAPI.saveDialog(saveFileCallback);
+    // dispatchFiles({
+    //   type: FileAction.REMOVE_FILE,
+    //   payload: file
+    // });
+  }
+
+  useEffect(() => {
+    if (closedAnyTab) {
+      setClosedActiveTab(false);
+      // window.electron.dialogAPI.saveDialog(saveFileCallback);
+      dispatchFiles({
+        type: FileAction.REMOVE_FILE,
+        payload: activeFile
+      });
+    }
+  }, [closedAnyTab, activeFile]);
+
   return (
     <>
       <div className="flex-direction-row">
@@ -73,13 +107,7 @@ export default function TabbedPane() {
                file={file}
                activePane={activeFile}
                setActivePane={() => setActiveFile(file)}
-               close={() => {
-                 setClosedActiveTab(true);
-                 dispatchFiles({
-                   type: FileAction.REMOVE_FILE,
-                   payload: file
-                 });
-               }}
+               close={() => handleCloseTab(file)}
                modified={file.modified}
           />
         )}
@@ -90,8 +118,10 @@ export default function TabbedPane() {
                        activeFile={activeFile}
                        setModified={updateModificationStatus}
                        setActiveFileContent={setActiveFileContent}
+                       setStatusBarInfo={setStatusBarInfo}
         />
       )}
+      {files.length > 0 && <StatusBar {...statusBarInfo} />}
     </>
   );
 }

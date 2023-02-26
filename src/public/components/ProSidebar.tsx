@@ -26,7 +26,7 @@ export default function ProSidebar() {
   }
 
   useEffect(() => {
-    window.electron.fileApi.openDirectory(openDirCallback);
+    window.electron.fileAPI.openDirectory(openDirCallback);
   }, []);
 
   const ComponentTree = (props: {root: Directory}) => {
@@ -87,8 +87,6 @@ export default function ProSidebar() {
              }}
     >
       {root !== null && <ComponentTree root={root} />}
-
-      {/*<button onClick={() => window.electron.notificationApi.sendNotification({msg: 'message'})}>bBtn</button>*/}
 
       <div onClick={handleCollapse}
               style={{

@@ -39,6 +39,7 @@ export default function ProMenuItem(props: IProMenuItem) {
     <MenuItem style={style}
               onMouseEnter={() => handleHover(true)}
               onMouseLeave={() => handleHover(false)}
+              onDoubleClick={() => console.log("double")}
     >
       <LabelComponent />
     </MenuItem>
